@@ -9,13 +9,16 @@ import { HttpError, sendError } from './utils/errors.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const port = Number(process.env.PORT || 3000);
-const clientDir = path.join(__dirname, '..', 'client', 'dist');
+const clientDistDir = path.join(__dirname, '..', 'client', 'dist');
+const clientSourceDir = path.join(__dirname, '..', 'client');
+const clientPublicDir = path.join(__dirname, '..', 'client', 'public');
 
 const mimeTypes = {
   '.html': 'text/html; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8',
   '.json': 'application/json; charset=utf-8',
+  '.webmanifest': 'application/manifest+json; charset=utf-8',
   '.svg': 'image/svg+xml',
   '.png': 'image/png',
   '.jpg': 'image/jpeg',
@@ -55,9 +58,10 @@ function sendNoContent(res) {
 }
 
 async function serveClient(requestPath, res) {
+  const clientDir = await directoryWithIndex();
   const normalized = requestPath === '/' ? '/index.html' : requestPath;
-  const filePath = path.normalize(path.join(clientDir, normalized));
-  if (!filePath.startsWith(clientDir)) throw new HttpError(403, 'Forbidden');
+  const filePath = await resolveClientFile(clientDir, normalized);
+  if (!filePath) throw new HttpError(404, 'Client asset not found');
   try {
     const body = await readFile(filePath);
     res.writeHead(200, { 'Content-Type': mimeTypes[path.extname(filePath)] || 'application/octet-stream' });
@@ -66,5 +70,40 @@ async function serveClient(requestPath, res) {
     const body = await readFile(path.join(clientDir, 'index.html'));
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
     res.end(body);
+  }
+}
+
+async function directoryWithIndex() {
+  if (process.env.NODE_ENV === 'production') {
+    try {
+      await readFile(path.join(clientDistDir, 'index.html'));
+      return clientDistDir;
+    } catch {
+      return clientSourceDir;
+    }
+  }
+  return clientSourceDir;
+}
+
+async function resolveClientFile(clientDir, normalized) {
+  const candidates = [
+    path.normalize(path.join(clientDir, normalized)),
+    path.normalize(path.join(clientPublicDir, normalized))
+  ];
+  for (const candidate of candidates) {
+    const allowed = candidate.startsWith(clientDir) || candidate.startsWith(clientPublicDir);
+    if (!allowed) throw new HttpError(403, 'Forbidden');
+    try {
+      await readFile(candidate);
+      return candidate;
+    } catch {
+      // Try the next candidate.
+    }
+  }
+  try {
+    await readFile(path.join(clientDistDir, 'index.html'));
+    return path.join(clientDistDir, 'index.html');
+  } catch {
+    return path.join(clientSourceDir, 'index.html');
   }
 }

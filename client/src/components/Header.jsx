@@ -1,9 +1,11 @@
 import { useStore } from '../Store';
 import { ClipboardPaste } from 'lucide-react';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export default function Header() {
-  const { queue } = useStore();
+  const { queue, analyzeUrl, status } = useStore();
+  const navigate = useNavigate();
   const [url, setUrl] = useState('');
   const [type, setType] = useState('auto');
   const [quality, setQuality] = useState('auto');
@@ -17,9 +19,15 @@ export default function Header() {
     }
   };
 
-  const handleAnalyze = (e) => {
+  const handleAnalyze = async (e) => {
     e.preventDefault();
-    // placeholder
+    try {
+      await analyzeUrl({ url: url.trim(), preferredType: type, quality });
+      setUrl('');
+      navigate('/');
+    } catch {
+      // Status is already surfaced in the UI.
+    }
   };
 
   return (
@@ -63,7 +71,10 @@ export default function Header() {
             <option value="audio-high">High audio</option>
           </select>
         </div>
-        <button className="btn primary" type="submit">Analyze & Prepare</button>
+        <button className="btn primary" type="submit" disabled={status.state === 'loading'}>
+          {status.state === 'loading' ? 'Analyzing...' : 'Analyze & Prepare'}
+        </button>
+        {status.message && <div className={`status show ${status.state === 'error' ? 'error' : ''}`}>{status.message}</div>}
       </form>
     </header>
   );

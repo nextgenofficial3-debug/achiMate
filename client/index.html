@@ -1,13 +1,122 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#07111f" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#07111f">
+    <meta name="description" content="AchiMate media downloader for public video, audio, and image links.">
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icon-192.png">
+    <link rel="stylesheet" href="/src/index.css">
     <title>AchiMate - Media Downloader</title>
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
+    <div class="app">
+      <header class="top">
+        <div class="brand-row">
+          <div class="brand">
+            <div class="mark">A</div>
+            <div>
+              <h1>AchiMate</h1>
+              <p>Video, music, image downloader</p>
+            </div>
+          </div>
+          <div class="quota" id="queue-count">0 queued</div>
+        </div>
+        <form class="search-card" id="analyze-form">
+          <div class="url-row">
+            <input id="url-input" placeholder="Paste a public media URL" inputmode="url" required>
+            <button class="btn icon-only" id="paste-btn" type="button" title="Paste">⧉</button>
+          </div>
+          <div class="filters">
+            <select id="type-select">
+              <option value="auto">Auto detect</option>
+              <option value="video">Video</option>
+              <option value="audio">Audio</option>
+              <option value="image">Image</option>
+            </select>
+            <select id="quality-select">
+              <option value="auto">Best available</option>
+              <option value="1080p">1080p</option>
+              <option value="720p">720p</option>
+              <option value="480p">480p</option>
+              <option value="audio-high">High audio</option>
+            </select>
+          </div>
+          <button class="btn primary" id="analyze-btn" type="submit">Analyze & Prepare</button>
+          <div class="status" id="status"></div>
+        </form>
+      </header>
+
+      <main class="pages">
+        <section class="page stack active" id="home">
+          <div class="hero">
+            <h2>Download public media with a real backend.</h2>
+            <p>Analyze direct files or public pages, preview the media, queue downloads, and keep a local library.</p>
+          </div>
+          <div class="quick-grid">
+            <button class="quick" data-type="video"><strong>▶ Video</strong><span>MP4, WebM</span></button>
+            <button class="quick" data-type="audio"><strong>♪ Audio</strong><span>MP3, M4A</span></button>
+            <button class="quick" data-type="image"><strong>▧ Image</strong><span>JPG, PNG</span></button>
+          </div>
+          <div class="card">
+            <div class="card-head">
+              <div><h3>Media Preview</h3><p id="preview-subtitle">Analyze a URL to preview playable media.</p></div>
+            </div>
+            <div class="card-body" id="preview-body"><div class="empty">No media selected yet.</div></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><div><h3>Recent Results</h3><p>Latest analyzed media options.</p></div></div>
+            <div class="card-body" id="recent-list"><div class="empty">Paste a URL to get started.</div></div>
+          </div>
+        </section>
+
+        <section class="page stack" id="queue">
+          <div class="card">
+            <div class="card-head">
+              <div><h3>Download Queue</h3><p>Multiple items with status tracking.</p></div>
+              <button class="btn" id="clear-queue">Clear</button>
+            </div>
+            <div class="card-body" id="queue-list"></div>
+          </div>
+        </section>
+
+        <section class="page stack" id="library">
+          <div class="card">
+            <div class="card-head"><div><h3>Library</h3><p>Saved and downloaded media.</p></div></div>
+            <div class="card-body" id="library-list"></div>
+          </div>
+        </section>
+
+        <section class="page stack" id="settings">
+          <div class="card">
+            <div class="card-head"><div><h3>Settings</h3><p>App behavior and PWA install.</p></div></div>
+            <div class="card-body settings-grid">
+              <button class="btn primary" id="install-btn" disabled>Install Available After Browser Check</button>
+              <div class="switch-row">
+                <div><strong>Auto-add results to queue</strong><span>Every analysis result is queued automatically.</span></div>
+                <button class="toggle on" data-setting="autoQueue"><i></i></button>
+              </div>
+              <div class="switch-row">
+                <div><strong>Use backend proxy for preview</strong><span>Improves Chrome playback.</span></div>
+                <button class="toggle on" data-setting="proxyPreview"><i></i></button>
+              </div>
+              <button class="btn" id="export-library">Export Library JSON</button>
+              <button class="btn" id="clear-library">Clear Library</button>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <nav class="bottom-nav">
+        <button class="nav active" data-page="home">⌂<span>Home</span></button>
+        <button class="nav" data-page="queue">⇩<span>Queue</span></button>
+        <button class="nav" data-page="library">▤<span>Library</span></button>
+        <button class="nav" data-page="settings">⚙<span>Settings</span></button>
+      </nav>
+    </div>
+    <div class="toast" id="toast" aria-live="polite"></div>
+    <script type="module" src="/src/app.js"></script>
   </body>
 </html>

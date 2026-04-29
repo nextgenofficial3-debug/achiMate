@@ -28,6 +28,7 @@ server/
 ## Run
 
 ```bash
+npm run build
 npm start
 ```
 
@@ -36,6 +37,12 @@ Open:
 ```text
 http://localhost:3000
 ```
+
+During local development the server serves `client/index.html` and `client/src/app.js` directly. `npm run build` copies the dependency-free client into `client/dist` for production serving.
+
+## PWA Install
+
+AchiMate includes a web app manifest, service worker, and app icons. In Chrome on `localhost` or HTTPS, open Settings and use **Install AchiMate App** when the browser exposes the install prompt.
 
 Admin password defaults to:
 
