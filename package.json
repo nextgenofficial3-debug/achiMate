@@ -1,0 +1,14 @@
+{
+  "name": "achimate",
+  "version": "1.0.0",
+  "description": "AchiMate media downloader web app with modular client and Express backend.",
+  "type": "module",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js"
+  },
+  "dependencies": {},
+  "engines": {
+    "node": ">=20"
+  }
+}
